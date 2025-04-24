@@ -1,0 +1,6 @@
+streamlit
+simpy
+fastapi
+pydantic
+uvicorn
+matplotlib
