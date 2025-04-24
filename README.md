@@ -71,7 +71,7 @@ Para crear la base de datos:
 
 ```bash
 python src/models.py
-
+```
 ---
 
 ## 🚀 5. Ejecutar la aplicación
