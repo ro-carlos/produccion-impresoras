@@ -12,7 +12,7 @@ conn = sqlite3.connect(db_file)
 cursor = conn.cursor()
 
 # Leer el script SQL desde un archivo (si lo tienes guardado)
-with open('crear_tablas.sql', 'r') as sql_file:
+with open('/src/crear_tablas.sql', 'r') as sql_file:
     sql_script = sql_file.read()
     
 # O usar el script directamente como string
