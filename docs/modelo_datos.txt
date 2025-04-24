@@ -1,0 +1,120 @@
+Producto(
+    id, 
+    nombre, 
+    tipo,  # "materia_prima" o "terminado"
+    unidad_medida,  # "unidad", "kg", etc.
+    espacio_almacen  # Por defecto 1, cuánto espacio ocupa en almacén
+)
+
+BOM(
+    id,
+    prod_terminado_id,  # FK a Producto
+    material_id,        # FK a Producto
+    cantidad            # Cantidad necesaria del material
+)
+
+Proveedor(
+    id,
+    nombre,
+    direccion,
+    contacto
+)
+
+CatalogoProveedor(
+    id,
+    proveedor_id,       # FK a Proveedor
+    producto_id,        # FK a Producto
+    precio_unitario,
+    cantidad_minima,    # Cantidad mínima de compra
+    cantidad_paquete,   # Tamaño del paquete (por ej. 1000 unidades)
+    lead_time_dias      # Tiempo de entrega en días
+)
+
+Inventario(
+    producto_id,        # FK a Producto
+    cantidad,
+    fecha_actualizacion
+)
+
+PedidoFabricacion(
+    id,
+    fecha_creacion,
+    producto_id,        # FK a Producto
+    cantidad,
+    estado,             # "pendiente", "en_produccion", "completado", "cancelado"
+    prioridad,          # Opcional: para establecer orden de fabricación
+    fecha_inicio_prod,  # Fecha en que comenzó la producción
+    fecha_fin_prod      # Fecha estimada/real de finalización
+)
+
+OrdenCompra(
+    id,
+    proveedor_id,       # FK a Proveedor
+    fecha_emision,
+    fecha_entrega_est,
+    estado,             # "emitida", "en_transito", "recibida", "cancelada"
+    costo_total         # Para seguimiento financiero
+)
+
+DetalleOrdenCompra(
+    id,
+    orden_compra_id,    # FK a OrdenCompra
+    producto_id,        # FK a Producto
+    cantidad,
+    precio_unitario,
+    catalogo_proveedor_id  # FK a CatalogoProveedor
+)
+
+Evento(
+    id,
+    tipo,               # "compra", "produccion", "entrega", "demanda", etc.
+    fecha_simulacion,
+    entidad_id,         # ID de la entidad relacionada (pedido, orden, etc.)
+    entidad_tipo,       # Tipo de entidad ("PedidoFabricacion", "OrdenCompra", etc.)
+    detalle,            # Descripción detallada
+    resultado           # Resultado o impacto del evento
+)
+
+ConfiguracionSimulacion(
+    id,
+    fecha_actual,       # Fecha actual de la simulación
+    media_demanda,      # Parámetros para generación aleatoria
+    varianza_demanda,
+    capacidad_almacen,
+    capacidad_produccion_diaria  # Cuántos productos se pueden fabricar por día
+)
+
+LineaProduccion(
+    id,
+    nombre,
+    capacidad_diaria,   # Cuántos productos puede procesar por día
+    estado              # "activa", "inactiva", "mantenimiento"
+)
+
+AsignacionProduccion(
+    id,
+    pedido_id,          # FK a PedidoFabricacion
+    linea_produccion_id, # FK a LineaProduccion
+    fecha_asignacion,
+    fecha_inicio,
+    fecha_fin_estimada,
+    estado              # "planificada", "en_proceso", "completada"
+)
+
+HistoricoInventario(
+    id,
+    producto_id,        # FK a Producto
+    fecha,
+    cantidad,
+    tipo_movimiento     # "entrada", "salida", "ajuste"
+)
+
+MetricasRendimiento(
+    id,
+    fecha,
+    pedidos_completados,
+    pedidos_retrasados,
+    nivel_servicio,     # Porcentaje de pedidos entregados a tiempo
+    rotacion_inventario,
+    costos_totales
+)
