@@ -54,7 +54,27 @@ pip install -r requirements.txt
 
 ---
 
-## 🚀 4. Ejecutar la aplicación
+##    4. Modelo de datos
+
+El modelo de datos del simulador se encuentra documentado en detalle en el archivo [docs/modelo_datos.md](docs/modelo_datos.md). Este documento describe todas las entidades, sus atributos y las relaciones entre ellas.
+
+## Configuración de la base de datos
+
+El simulador utiliza SQLite3 como sistema de gestión de base de datos. La creación y configuración de la base de datos se realiza a través del script `src/models.py`.
+
+### Creación de la base de datos
+
+Para crear la base de datos:
+
+1. Asegúrate de tener instalada la biblioteca sqlite3 de Python
+2. Ejecuta el script models.py:
+
+```bash
+python src/models.py
+
+---
+
+## 🚀 5. Ejecutar la aplicación
 
 Lanza la aplicación con:
 
@@ -67,7 +87,7 @@ Esto abrirá automáticamente tu navegador en:
 
 ---
 
-## 💡 5. Configuración opcional de desarrollo
+## 💡 6. Configuración opcional de desarrollo
 
 Puedes crear un archivo de configuración para que Streamlit recargue automáticamente al guardar:
 
