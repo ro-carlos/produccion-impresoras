@@ -1,6 +1,8 @@
 streamlit
 simpy
-fastapi
-pydantic
-uvicorn
+fastapi==0.109.2
+pydantic==2.6.1
+uvicorn==0.27.1
 matplotlib
+python-multipart
+email-validator

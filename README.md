@@ -100,6 +100,58 @@ headless = true
 
 ---
 
+## 🌐 7. Ejecución del Servicio REST
+
+El proyecto incluye una API REST construida con FastAPI que permite gestionar productos y órdenes de producción. Para ejecutar el servicio:
+
+
+Inicia el servidor:
+```bash
+uvicorn main:app --reload
+```
+
+El servidor estará disponible en:
+- API: http://localhost:8000
+- Documentación interactiva: http://localhost:8000/docs
+- Documentación alternativa: http://localhost:8000/redoc
+
+### Endpoints disponibles
+
+#### Productos
+- `POST /products/`: Crear un nuevo producto
+- `GET /products/`: Obtener todos los productos
+- `PUT /products/{product_id}`: Actualizar un producto existente
+
+#### Órdenes de Producción
+- `POST /production-orders/`: Crear una nueva orden de producción
+- `GET /production-orders/`: Obtener todas las órdenes de producción
+- `PUT /production-orders/{order_id}`: Actualizar una orden de producción existente
+
+### Ejemplos de uso
+
+1. Crear un producto:
+```bash
+curl -X POST "http://localhost:8000/products/" \
+     -H "Content-Type: application/json" \
+     -d '{"id": 1, "name": "Impresora 3D Básica", "type": "finished"}'
+```
+
+2. Crear una orden de producción:
+```bash
+curl -X POST "http://localhost:8000/production-orders/" \
+     -H "Content-Type: application/json" \
+     -d '{"id": 1, "created_date": "2024-03-20", "product_id": 1, "quantity": 10, "status": "pending"}'
+```
+
+3. Actualizar una orden:
+```bash
+curl -X PUT "http://localhost:8000/production-orders/1" \
+     -H "Content-Type: application/json" \
+     -d '{"id": 1, "created_date": "2024-03-20", "product_id": 1, "quantity": 10, "status": "in_production"}'
+```
+
+---
+
 ¡Listo! Ahora puedes empezar a trabajar en tu simulador 🚀
 
 
