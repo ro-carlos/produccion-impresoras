@@ -8,14 +8,15 @@ El Simulador de Producción de Impresoras 3D es una aplicación de software dise
 ## 2. Objetivos del Producto
 
 - Desarrollar un simulador que modele de manera realista el proceso de producción de impresoras 3D.
+- Diseñar la arquitectura base de un sistema MRP escalable.
 - Permitir a los usuarios practicar y mejorar sus habilidades de planificación de producción.
-- Demostrar la aplicación de conceptos de gestión de inventarios y cadena de suministro.
-- Proporcionar una herramienta educativa interactiva con interfaz de usuario intuitiva.
+- Proporcionar una herramienta interactiva con interfaz de usuario intuitiva.
 - Ofrecer acceso a toda la funcionalidad e información a través de una API REST.
 
 ## 3. Usuarios Objetivo
 
 - Estudiantes en el campo de ingeniería de sistemas, producción o gestión de operaciones.
+- Arquitectos de sistemas de información que tengan como objetivo construir un MRP escalable.
 - Profesionales en formación en gestión de cadena de suministro.
 - Educadores que buscan herramientas didácticas para enseñar conceptos de planificación de producción.
 
@@ -73,33 +74,34 @@ El Simulador de Producción de Impresoras 3D es una aplicación de software dise
 - Interfaz web sencilla y accesible.
 - Sin necesidad de instalaciones complejas en el cliente.
 
-### 5.3 Compatibilidad
-- Compatibilidad con Windows, macOS y Linux.
+### 5.3 Despliegue
+- Contenedores Docker orquestados con Docker Compose
+
 
 ## 6. Modelo de Datos
 
 ### 6.1 Entidades Principales
 
 #### Productos
-- **Product** (id, name, type: "raw" o "finished")
+- **Products** (id, name, type: "raw" or "finished")
 
 #### Composición de Productos
-- **BOM** (prod_terminado_id, material_id, cantidad)
+- **BOM** (finished_product_id, material_id, quantity)
 
 #### Proveedores
-- **Supplier** (id, name, product_id, unit_cost, lead_time_dias)
+- **Suppliers** (id, name, product_id, unit_cost, lead_time_days)
 
 #### Inventario
-- **InventoryItem** (product_id, qty)
+- **StockCurrent** (product_id, quantity)
 
 #### Pedidos
-- **PedidoFab** (id, fecha_creac, producto_id, cantidad, estado)
+- **ManufacturingOrders**  (id, creation_date, product_id, quantity, status)
 
 #### Compras
-- **OrdenCompra** (id, proveedor_id, producto_id, cantidad, fecha_emision, fecha_entrega_est, estado)
+- **PurchaseOrders** (id, supplier_id, product_id, quantity, issue_date, estimated_delivery_date, status)
 
 #### Eventos
-- **Evento** (id, tipo, fecha_sim, detalle)
+- **Events** (id, type, event_date, details)
 
 ### 6.2 Modelos de Impresoras 3D
 - **P3D-Classic**: Modelo base con componentes estándar.
@@ -140,70 +142,68 @@ El Simulador de Producción de Impresoras 3D es una aplicación de software dise
 
 | Capa | Herramienta | Motivo |
 |------|-------------|--------|
-| Lenguaje | Python 3.11/3.12 | Ampliamente usado, sintaxis simple |
+| Lenguaje | Python 3.11 | Ampliamente usado |
 | Simulación | SimPy | Motor de eventos discretos fácil de usar |
-| Persistencia | SQLite y/o archivo JSON | Ligeros y portables |
-| Back-end/API | Fastapi + Pydantic | Para la implementación de la API REST |
-| Interfaz | Streamlit | Construcción rápida de dashboards |
-| Gráficas | matplotlib | Integración directa en Streamlit |
+| Persistencia | SQLite | Ligero y portable |
+| Back-end API | Fastapi + Pydantic | Implementación de la API REST |
+| Interfaz | Streamlit | Construcción rápida |
+| Gráficas | Vega-Altair | Integración directa en Streamlit |
 | Control de versiones | Git + GitHub | Flujo estándar de desarrollo |
 
 ### 8.2 Estructuras de Datos en Python
 ```python
+from typing import Literal, Optional, Dict, List
 from pydantic import BaseModel
-from typing import Literal, Dict, List, Optional
 
+# Productos
 class Product(BaseModel):
     id: int
     name: str
-    type: Literal["raw", "finished"]
+    type: Literal["raw", "finished"]  # Tipo de producto
 
-class InventoryItem(BaseModel):
-    product_id: int
-    qty: int
+# Composición de productos (Bill of Materials)
+class BOM(BaseModel):
+    finished_product_id: int
+    material_id: int
+    quantity: int
 
+# Proveedores
 class Supplier(BaseModel):
     id: int
     name: str
-    product_id: int
+    product_id: int  # Producto que provee
     unit_cost: float
-    lead_time: int  # días
+    lead_time_days: int  # Tiempo de entrega en días
 
-class BOM(BaseModel):
-    prod_terminado_id: int
-    material_id: int
-    cantidad: int
+# Inventario actual
+class StockCurrent(BaseModel):
+    product_id: int
+    quantity: int
 
-class PedidoFab(BaseModel):
+# Pedidos de fabricación
+class ManufacturingOrder(BaseModel):
     id: int
-    fecha_creac: str
-    producto_id: int
-    cantidad: int
-    estado: str
+    creation_date: str  # ISO 8601 o formato consistente
+    product_id: int
+    quantity: int
+    status: str
 
-class OrdenCompra(BaseModel):
+# Órdenes de compra
+class PurchaseOrder(BaseModel):
     id: int
-    proveedor_id: int
-    producto_id: int
-    cantidad: int
-    fecha_emision: str
-    fecha_entrega_est: str
-    estado: str
+    supplier_id: int
+    product_id: int
+    quantity: int
+    issue_date: str
+    estimated_delivery_date: str
+    status: str
 
-class Evento(BaseModel):
+# Eventos
+class Event(BaseModel):
     id: int
-    tipo: str
-    fecha_sim: str
-    detalle: str
-
-class ModelConfig(BaseModel):
-    bom: Dict[str, int]
-    pcb_ref: Optional[str] = None
-
-class ProductionPlan(BaseModel):
-    capacity_per_day: int
-    models: Dict[str, ModelConfig]
-    plan: List[Dict]
+    type: str
+    event_date: str
+    details: str
 ```
 
 ## 9. Flujo de Simulación
