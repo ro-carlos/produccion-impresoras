@@ -15,6 +15,14 @@ services:
     command: python main.py --api-only
     networks:
       - simulator-network
+    # El healthcheck actual podría estar fallando si curl no está instalado o el endpoint no está listo
+    # Usemos un healthcheck más simple basado en TCP
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket; socket.socket().connect((\"localhost\", 8000))"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
 
   ui:
     build:
@@ -30,7 +38,8 @@ services:
       - STREAMLIT_PORT=8501
     command: python main.py --ui-only --api-host api
     depends_on:
-      - api
+      api:
+        condition: service_healthy
     networks:
       - simulator-network
 

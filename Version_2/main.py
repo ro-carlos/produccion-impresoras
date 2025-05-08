@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 import logging
 import threading
+import time
 
 from config.settings import API_HOST, API_PORT, STREAMLIT_PORT, load_config
 from config.di_container import DIContainer
@@ -55,21 +56,32 @@ def start_streamlit(streamlit_port: int = STREAMLIT_PORT, api_port: int = API_PO
         api_port: Puerto donde está escuchando la API
     """
     # Construir la URL de la API
-    api_url = f"http://localhost:{api_port}"
+    api_host = os.environ.get("API_HOST", "localhost")
+    api_url = f"http://{api_host}:{api_port}"
     
     # Obtener la ruta al archivo de la aplicación Streamlit
     streamlit_app_path = Path(__file__).resolve().parent / "presentation" / "streamlit_app.py"
+    
+    # Verificar si estamos en modo UI only (Docker probablemente)
+    ui_only_mode = "--ui-only" in sys.argv
     
     # Construir comando para iniciar Streamlit
     cmd = [
         "streamlit", "run", str(streamlit_app_path),
         "--server.port", str(streamlit_port),
+        "--server.address", "0.0.0.0",  # Escuchar en todas las interfaces
         "--", api_url
     ]
     
-    # Iniciar proceso de Streamlit
     logger.info(f"Iniciando aplicación Streamlit en http://localhost:{streamlit_port}")
-    subprocess.Popen(cmd)
+    
+    if ui_only_mode:
+        # En modo UI only, ejecutamos directamente el comando
+        # Esto mantiene vivo el proceso principal del contenedor Docker
+        os.execvp(cmd[0], cmd)
+    else:
+        # En modo normal, iniciamos como proceso separado
+        subprocess.Popen(cmd)
 
 def main():
     """Función principal de la aplicación."""
@@ -129,7 +141,6 @@ def main():
             try:
                 # Mantener vivo el proceso principal hasta Ctrl+C
                 while True:
-                    import time
                     time.sleep(1)
             except KeyboardInterrupt:
                 logger.info("Deteniendo el simulador...")
