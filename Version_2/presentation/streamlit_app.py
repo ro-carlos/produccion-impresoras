@@ -309,6 +309,74 @@ class StreamlitApp:
                 st.info("No hay materias primas disponibles para comprar.")
                 return
             
+            # NUEVO: Crear diccionario para mapear product_id a productos del inventario
+            inventory_dict = {item.get("product_id"): item for item in st.session_state.inventory}
+            
+            # NUEVO: Agregar resumen de materiales requeridos
+            with st.expander("📊 Resumen de materiales necesarios para todos los pedidos pendientes", expanded=True):
+                if not st.session_state.pending_orders:
+                    st.info("No hay pedidos pendientes.")
+                else:
+                    # Crear diccionario para contabilizar el total de materiales requeridos
+                    required_materials = {}
+                    
+                    # Recorrer todos los pedidos pendientes
+                    for order in st.session_state.pending_orders:
+                        if not isinstance(order, dict) or 'materials' not in order:
+                            continue
+                        
+                        # Recorrer los materiales de cada pedido
+                        materials = order.get("materials", [])
+                        for material in materials:
+                            if not isinstance(material, dict) or 'id' not in material:
+                                continue
+                            
+                            material_id = material.get('id')
+                            if material_id not in required_materials:
+                                required_materials[material_id] = {
+                                    'id': material_id,
+                                    'name': material.get('name', f'Material ID: {material_id}'),
+                                    'required': 0,
+                                    'available': 0,
+                                    'comprar': 0
+                                }
+                            
+                            required_materials[material_id]['required'] += material.get('required', 0)
+                    
+                    # Obtener datos de disponibilidad del inventario
+                    for material_id, data in required_materials.items():
+                        inventory_item = inventory_dict.get(material_id, {})
+                        available = inventory_item.get('quantity', 0)
+                        data['available'] = available
+                        data['comprar'] = max(0, data['required'] - available)
+                    
+                    # Crear DataFrame para mostrar
+                    if required_materials:
+                        materials_summary = list(required_materials.values())
+                        df = pd.DataFrame(materials_summary)
+                        df = df[['id', 'name', 'required', 'available', 'comprar']]
+                        df.columns = ['ID', 'Material', 'Total Requerido', 'Existencia', 'Comprar']
+                        
+                        # Función para resaltar filas con inventario insuficiente
+                        def highlight_insufficient(row):
+                            return ['background-color: #ffcccc' if row['Comprar'] > 0 else '' for _ in row]
+                        
+                        st.dataframe(df.style.apply(highlight_insufficient, axis=1))
+                        
+                        # Botón para seleccionar un material para comprar
+                        materials_to_buy = [m for m in materials_summary if m['comprar'] > 0]
+                        if materials_to_buy:
+                            if st.button("🔄 Seleccionar material para comprar", key="select_material_from_summary"):
+                                # Guardar en sesión para autoseleccionar en el dropdown
+                                material_id = materials_to_buy[0]['id']
+                                material_name = materials_to_buy[0]['name']
+                                st.session_state.selected_material_id = material_id
+                                st.success(f"Seleccionado: {material_name} (ID: {material_id})")
+                        else:
+                            st.info("No hay materiales que necesiten comprarse.")
+                    else:
+                        st.info("No hay detalles de materiales disponibles.")
+            
             # Seleccionar producto para comprar
             product_options = [f"{item.get('product_name', 'Desconocido')} (ID: {item.get('product_id', 0)})" 
                               for item in raw_materials if 'product_id' in item]
@@ -316,10 +384,19 @@ class StreamlitApp:
             if not product_options:
                 st.warning("No hay materias primas válidas disponibles.")
                 return
-                
+            
+            # Si hay un material seleccionado desde el resumen, pre-seleccionarlo
+            default_index = 0
+            if hasattr(st.session_state, 'selected_material_id'):
+                for i, option in enumerate(product_options):
+                    if f"(ID: {st.session_state.selected_material_id})" in option:
+                        default_index = i
+                        break
+            
             selected_product = st.selectbox(
                 "Seleccione material a comprar:",
                 options=product_options,
+                index=default_index,
                 key="purchase_product"
             )
             

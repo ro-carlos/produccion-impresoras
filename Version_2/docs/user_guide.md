@@ -134,13 +134,31 @@ Muestra:
 
 ![Panel de Compras](https://via.placeholder.com/800x300)
 
-Permite:
-- **Seleccionar proveedor**: Lista desplegable con proveedores disponibles.
-- **Seleccionar producto**: Muestra automáticamente el producto asociado al proveedor.
+El panel de compras proporciona dos funcionalidades principales:
+
+#### 3.4.1 Resumen de Materiales Necesarios
+
+Proporciona una visión general de todos los materiales requeridos para satisfacer los pedidos pendientes:
+
+- **Tabla consolidada**: Muestra una tabla con todos los materiales requeridos para los pedidos pendientes.
+- **Columnas informativas**:
+  - **ID**: Identificador único del material
+  - **Material**: Nombre del material
+  - **Total Requerido**: Suma total de las cantidades necesarias para todos los pedidos pendientes
+  - **Existencia**: Cantidad actual disponible en inventario
+  - **Comprar**: Diferencia entre lo requerido y lo disponible (cantidad sugerida para comprar)
+- **Resaltado visual**: Las filas con inventario insuficiente se destacan en color rojo.
+- **Botón "Seleccionar material para comprar"**: Permite seleccionar automáticamente el primer material con inventario insuficiente para realizar una compra rápida.
+
+#### 3.4.2 Formulario de Compra
+
+Permite realizar compras de materiales individuales:
+
+- **Seleccionar producto**: Lista desplegable con materias primas disponibles.
+- **Seleccionar proveedor**: Lista desplegable con proveedores disponibles para el producto seleccionado.
 - **Especificar cantidad**: Campo numérico para indicar cuánto comprar.
 - **Ver detalles del proveedor**: Costo unitario y tiempo de entrega.
-- **Botón "Emitir orden de compra"**: Crea una nueva orden de compra.
-- **Órdenes pendientes**: Lista de órdenes de compra en camino.
+- **Botón "Realizar compra"**: Crea una nueva orden de compra.
 
 ### 3.5 Panel de Producción
 
@@ -195,11 +213,18 @@ Basándote en tu análisis, debes decidir:
 
 #### 4.3.2 Decisiones de Compra
 
-1. **Emitir órdenes de compra**:
-   - Selecciona un proveedor de la lista desplegable.
-   - Verifica el producto, costo unitario y tiempo de entrega.
-   - Indica la cantidad que deseas comprar.
-   - Haz clic en "Emitir orden de compra".
+1. **Revisar necesidades de materiales**:
+   - Examina el resumen de materiales necesarios para todos los pedidos pendientes.
+   - Identifica qué materiales tienen cantidades insuficientes (resaltados en rojo).
+   - Observa la columna "Comprar" que indica la cantidad sugerida a adquirir.
+   - Utiliza el botón "Seleccionar material para comprar" para seleccionar automáticamente el primer material con inventario insuficiente.
+
+2. **Emitir órdenes de compra**:
+   - Selecciona un material de la lista desplegable (automático si usaste el botón del resumen).
+   - Elige un proveedor para ese material.
+   - Verifica el costo unitario y tiempo de entrega del proveedor seleccionado.
+   - Indica la cantidad que deseas comprar (puedes usar como referencia la cantidad sugerida en el resumen).
+   - Haz clic en "Realizar compra".
    - La orden quedará registrada y los materiales llegarán después del tiempo de entrega especificado.
 
 ### 4.4 Avanzar al Siguiente Día
